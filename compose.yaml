@@ -1,0 +1,39 @@
+name: gringott-sandbox
+services:
+  gringott:
+    build: .
+    image: gringott-sandbox:local
+    restart: unless-stopped
+    init: true
+    environment:
+      HOST: 0.0.0.0
+      PORT: "4173"
+      GRINGOTT_ADMIN_KEY_FILE: /run/secrets/gringott-admin.key
+    secrets:
+      - source: gringott_admin
+        target: gringott-admin.key
+    ports:
+      - "127.0.0.1:4173:4173"
+    networks:
+      - geobridge-mocks
+    mem_limit: 128m
+    cpus: 0.25
+    read_only: true
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,size=16m
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    logging:
+      driver: json-file
+      options:
+        max-size: "5m"
+        max-file: "2"
+secrets:
+  gringott_admin:
+    file: ./secrets/admin.key
+networks:
+  geobridge-mocks:
+    external: true
+    name: geobridge-mocks
